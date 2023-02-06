@@ -93,3 +93,19 @@ export const monthlyTopTracks = async (user) => {
   );
 };
 
+export const getMonthlyTopTracksPage = async ({
+  user,
+  chunks,
+  pageParam = 0,
+}) => {
+  // console.log({ user, chunks, pageParam });
+
+  if (!user || !chunks.length) return null;
+  const data = await Promise.all(
+    chunks[pageParam].map(async ({ from, to }) =>
+      getTopTracksByMonth(user, from, to),
+    ),
+  );
+
+  return { data, next: chunks.length > pageParam + 1 ? pageParam + 1 : null };
+};
