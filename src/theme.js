@@ -3,10 +3,10 @@ import { Barlow } from '@next/font/google';
 import NextLink from 'next/link';
 import { forwardRef } from 'react';
 
-const LinkBehaviour = forwardRef((props, ref) => {
+const LinkBehaviour = forwardRef((props, ref) => (
   // eslint-disable-next-line react/jsx-filename-extension
-  <NextLink ref={ref} {...props} />;
-});
+  <NextLink ref={ref} {...props} />
+));
 LinkBehaviour.displayName = 'Link';
 
 export const barlow = Barlow({
