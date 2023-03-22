@@ -1,19 +1,18 @@
 import React, { useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Image from 'next/image';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import Typography from '@mui/material/Typography';
 import Backdrop from '@mui/material/Backdrop';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
-import { format } from 'date-fns';
 import { useAsyncEffect } from 'rooks';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
@@ -21,15 +20,16 @@ import {
   getLastfmUser,
   getValidMonths,
   getMonthlyTopTracksPage,
-} from '@/src/lib/lastfm';
-import arrToChunks from '@/src/lib/arrToChunks';
+  arrToChunks,
+} from '@/src/lib/utils';
+import { Track } from '@/src/lib/components';
 import theme from '../src/theme';
 
 export default function Home() {
-  const [userName, setUserName] = useState('');
+  const router = useRouter();
+  const [userName, setUserName] = useState('foxtrapper121');
   const [chunks, setChunks] = useState([]);
   const topTrackMonthsConcat = useRef(null);
-  const stats = useRef(null);
 
   const {
     isLoading: isLoadingUser,
@@ -60,10 +60,20 @@ export default function Home() {
   }, [user]);
 
   if (errorUser || errorTopTrackMonths) {
-    return <div>An error occurred, please reload.</div>;
+    return (
+      <Backdrop sx={{ color: '#fff', zIndex: 1 }} open>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Typography>An error occurred, please reload.</Typography>
+          <Button
+            onClick={() => router.reload(window.location.pathname)}
+            sx={{ width: 'fit-content' }}
+          >
+            Reload
+          </Button>
+        </Box>
+      </Backdrop>
+    );
   }
-
-  console.log(stats.current);
 
   topTrackMonthsConcat.current = topTrackMonths?.pages?.reduce(
     (acc, curr) => acc.concat(curr?.data ?? []),
@@ -103,7 +113,7 @@ export default function Home() {
                     <InputAdornment position="end">
                       <IconButton
                         type="submit"
-                        aria-label="toggle password visibility"
+                        aria-label="load user's tracks"
                         edge="end"
                       >
                         <SearchIcon />
@@ -112,6 +122,7 @@ export default function Home() {
                   ),
                 }}
               />
+              {/* <Stats topTrackMonthsConcat={topTrackMonthsConcat.current} /> */}
             </form>
             {isLoadingUser || isLoadingTopTrackMonths ? (
               <div>
@@ -143,76 +154,9 @@ export default function Home() {
               >
                 <Grid container>
                   {topTrackMonths?.pages[0]?.data &&
-                    topTrackMonthsConcat.current?.map((month) => {
-                      const dateFromUnix = new Date(
-                        Number(month['@attr'].from) * 1000,
-                      );
-                      const formattedDate = format(dateFromUnix, 'MMMM Y');
-
-                      const topTrack = month.track[0];
-                      if (!topTrack) return null;
-                      // let image = topTrack?.image[2]['#text'];
-
-                      // const query = `artist:"${topTrack.artist['#text']}" AND "${topTrack.name}"`;
-
-                      // if (topTrack.artist.mbid) {
-                      //   query.concat(` AND arid:${topTrack.artist.mbid}`);
-                      // }
-
-                      // const searchParams = new URLSearchParams({
-                      //   query,
-                      //   limit: 1,
-                      //   fmt: 'json',
-                      // });
-
-                      // axios
-                      //   .get(
-                      //     `https://musicbrainz.org/ws/2/recording?${searchParams.toString()}`,
-                      //   )
-                      //   .then(({ data }) =>
-                      //     console.log(topTrack.artist['#text'], topTrack.name, data),
-                      //   );
-                      return (
-                        <React.Fragment key={month['@attr'].from}>
-                          {/* eslint-disable-next-line react/no-array-index-key */}
-                          <Grid item xs={1}>
-                            <Image
-                              alt="track image"
-                              src={month.track[0].image[2]['#text']}
-                              width={50}
-                              height={50}
-                            />
-                          </Grid>
-                          <Grid item xs={11}>
-                            <Box
-                              height="100%"
-                              display="flex"
-                              alignItems="center"
-                            >
-                              <Box>
-                                <Typography variant="subtitle2" color="primary">
-                                  {formattedDate}
-                                </Typography>
-                                <Link
-                                  href={month.track[0].url}
-                                  variant="p"
-                                  underline="hover"
-                                  target="_blank"
-                                  sx={{
-                                    textDecorationColor:
-                                      theme.palette.secondary.contrastText,
-                                    color: theme.palette.secondary.contrastText,
-                                  }}
-                                >
-                                  {month.track[0].name} -{' '}
-                                  {month.track[0].artist['#text']}
-                                </Link>
-                              </Box>
-                            </Box>
-                          </Grid>
-                        </React.Fragment>
-                      );
-                    })}
+                    topTrackMonthsConcat.current?.map((month) => (
+                      <Track key={month['@attr'].from} month={month} />
+                    ))}
                 </Grid>
               </InfiniteScroll>
             )}
