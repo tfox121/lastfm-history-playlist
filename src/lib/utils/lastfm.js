@@ -98,8 +98,6 @@ export const getMonthlyTopTracksPage = async ({
   chunks,
   pageParam = 0,
 }) => {
-  // console.log({ user, chunks, pageParam });
-
   if (!user || !chunks.length) return null;
   const data = await Promise.all(
     chunks[pageParam].map(async ({ from, to }) =>
