@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -7,14 +8,38 @@ import Link from '@mui/material/Link';
 import { format } from 'date-fns';
 
 import theme from '../../theme';
+import { spotify, spotifyAuth } from '../utils';
 
 export default function Track({ month }) {
   const trackArt = useRef(null);
+  const { data: spotifyToken } = useQuery(['spotifyAuthToken'], () =>
+    spotifyAuth(),
+  );
   const dateFromUnix = new Date(Number(month['@attr'].from) * 1000);
   const formattedDate = format(dateFromUnix, 'MMMM Y');
 
   const topTrack = month.track[0];
   if (!topTrack) return null;
+
+  const query = `track:${encodeURIComponent(
+    month.track[0].name,
+  )}%20artist:${encodeURIComponent(
+    month.track[0].artist['#text'],
+  )}&type=track&limit=1`;
+
+  spotify
+    .get(`/search?q=${query}`, {
+      headers: { Authorization: `Bearer ${spotifyToken}` },
+    })
+    .then(({ data }) => {
+      const track = data.tracks.items[0];
+      trackArt.current = track.album.images[1].url;
+    })
+    .catch(() => {
+      console.warn(
+        `Cannot find artwork for ${month.track[0].name} by ${month.track[0].artist['#text']}`,
+      );
+    });
 
   return (
     <>
