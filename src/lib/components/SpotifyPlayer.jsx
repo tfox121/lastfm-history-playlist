@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
@@ -32,10 +33,9 @@ export default function SpotifyPlayer() {
     const getCurrentlyPlaying = async () => {
       try {
         const response = await getSpotifyPlayingState(spotifyToken);
-        // eslint-disable-next-line camelcase
         const { item, is_playing, progress_ms } = response.data;
         setMediaItem(item);
-        setIsPlaying(is_playing);
+        if (is_playing !== isPlaying) setIsPlaying(is_playing);
         setProgressMs(progress_ms);
       } catch (err) {
         console.error(err);
@@ -55,7 +55,7 @@ export default function SpotifyPlayer() {
     return () => {
       clearInterval(checkInterval);
     };
-  }, [spotifyToken, setSpotifyToken, router]);
+  }, [spotifyToken, setSpotifyToken, router, isPlaying]);
 
   if (!mediaItem || !mediaItem.name) {
     return null;
@@ -86,13 +86,19 @@ export default function SpotifyPlayer() {
     if (isPlaying === true) {
       action = 'pause';
     }
-    spotify.put(
-      `/me/player/${action}`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${spotifyToken}` },
-      },
-    );
+    setIsPlaying(!isPlaying);
+    spotify
+      .put(
+        `/me/player/${action}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${spotifyToken}` },
+        },
+      )
+      .catch(() => {
+        console.error('Failed to change playing state');
+        setIsPlaying(!isPlaying);
+      });
   };
 
   const playOrPauseIcon = (playing) => {
