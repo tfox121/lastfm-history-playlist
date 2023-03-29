@@ -60,7 +60,7 @@ export default function Home() {
   useAsyncEffect(async () => {
     if (!user) return;
     const monthPeriods = await getValidMonths(user);
-    setChunks(arrToChunks(monthPeriods, 10));
+    setChunks(arrToChunks(monthPeriods, 14));
   }, [user]);
 
   if (errorUser || errorTopTrackMonths) {
