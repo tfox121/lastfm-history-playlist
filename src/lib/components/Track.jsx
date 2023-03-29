@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -9,9 +8,10 @@ import { format } from 'date-fns';
 
 import theme from '../../theme';
 import { spotify, spotifyAuth } from '../utils';
+import TrackImage from './TrackImage';
 
 export default function Track({ month }) {
-  const trackArt = useRef(null);
+  const track = useRef(null);
   const { data: spotifyToken } = useQuery(['spotifyAuthToken'], () =>
     spotifyAuth(),
   );
@@ -32,8 +32,7 @@ export default function Track({ month }) {
       headers: { Authorization: `Bearer ${spotifyToken}` },
     })
     .then(({ data }) => {
-      const track = data.tracks.items[0];
-      trackArt.current = track.album.images[1].url;
+      [track.current] = data.tracks.items;
     })
     .catch(() => {
       console.warn(
@@ -44,11 +43,10 @@ export default function Track({ month }) {
   return (
     <>
       <Grid item xs={1}>
-        <Image
-          alt="track image"
-          src={trackArt.current || month.track[0].image[2]['#text']}
-          width={50}
-          height={50}
+        <TrackImage
+          track={track.current}
+          fallbackArt={month.track[0].image[2]['#text']}
+          interactive
         />
       </Grid>
       <Grid item xs={11}>

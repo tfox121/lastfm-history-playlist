@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Image from 'next/image';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import Typography from '@mui/material/Typography';
 import Backdrop from '@mui/material/Backdrop';
@@ -22,7 +23,9 @@ import {
   getMonthlyTopTracksPage,
   arrToChunks,
 } from '@/src/lib/utils';
-import { Track } from '@/src/lib/components';
+import { SpotifyAuthLink, SpotifyPlayer, Track } from '@/src/lib/components';
+import { useSpotifyToken } from '@/src/lib/hooks';
+
 import theme from '../src/theme';
 
 export default function Home() {
@@ -30,6 +33,7 @@ export default function Home() {
   const [userName, setUserName] = useState('foxtrapper121');
   const [chunks, setChunks] = useState([]);
   const topTrackMonthsConcat = useRef(null);
+  const { spotifyToken } = useSpotifyToken();
 
   const {
     isLoading: isLoadingUser,
@@ -80,6 +84,9 @@ export default function Home() {
     [],
   );
 
+  const headingHeight = 4;
+  const headingWidthRatio = 3.46698113;
+
   return (
     <>
       <Head>
@@ -89,11 +96,35 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Container maxWidth="md">
-          <Box my={2}>
-            <Typography variant="h3" component="h1" gutterBottom>
-              Top Track Time Warp!
+        {!spotifyToken && (
+          <Box
+            width="100%"
+            height="1.5em"
+            bgcolor="#1DB954"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Typography variant="caption">
+              <SpotifyAuthLink>Login to Spotify</SpotifyAuthLink> to play tracks
+              and create playlists
             </Typography>
+          </Box>
+        )}
+        <Container maxWidth="md">
+          <Box py={2}>
+            <Box
+              width={`${headingHeight * headingWidthRatio}em`}
+              height={`${headingHeight}em`}
+              position="relative"
+            >
+              <Image
+                alt="Top Track Time Warp"
+                src="/TopTrackTimeWarpTspt.png"
+                fill
+                priority
+              />
+            </Box>
             <form
               onSubmit={(evt) => {
                 evt.preventDefault();
@@ -152,7 +183,7 @@ export default function Home() {
                   </Typography>
                 }
               >
-                <Grid container>
+                <Grid container rowSpacing={1}>
                   {topTrackMonths?.pages[0]?.data &&
                     topTrackMonthsConcat.current?.map((month) => (
                       <Track key={month['@attr'].from} month={month} />
@@ -162,6 +193,7 @@ export default function Home() {
             )}
           </Box>
         </Container>
+        {spotifyToken && <SpotifyPlayer />}
       </main>
     </>
   );
