@@ -111,7 +111,6 @@ export default function SpotifyPlayer() {
       position="sticky"
       bottom={0}
       left={0}
-      width="100vw"
     >
       <Grid container height="100%" columns={10}>
         <Grid
