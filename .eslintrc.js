@@ -12,6 +12,7 @@ module.exports = {
     'plugin:import/warnings',
     'next/core-web-vitals',
     'prettier',
+    'next',
   ],
   plugins: ['import'],
   parserOptions: {
@@ -48,5 +49,13 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'jest/no-mocks-import': 'off',
     'react/require-default-props': 'off',
+  },
+  settings: {
+    'import/resolver': {
+      alias: {
+        extensions: ['.js', '.jsx'],
+        map: [['@', '.']],
+      },
+    },
   },
 };

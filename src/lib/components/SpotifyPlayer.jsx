@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled';
@@ -14,7 +15,6 @@ import {
 } from '../utils';
 import TrackImage from './TrackImage';
 import { useSpotifyToken } from '../hooks';
-import { Grid } from '@mui/material';
 
 export default function SpotifyPlayer() {
   const router = useRouter();
