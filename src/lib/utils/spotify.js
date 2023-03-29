@@ -66,9 +66,9 @@ export const initiateSpotifyWebPlayer = async (token) => {
       });
 
       // Playback status updates
-      player.addListener('player_state_changed', (state) => {
-        console.log(state);
-      });
+      // player.addListener('player_state_changed', (state) => {
+      //    console.log(state);
+      // });
 
       // Ready
       player.addListener('ready', ({ device_id }) => {
@@ -81,7 +81,7 @@ export const initiateSpotifyWebPlayer = async (token) => {
       });
 
       // Connect to the player!
-      player.disconnect();
+      player.connect();
     };
     const body = document.getElementsByTagName('body')[0];
     if (body) {
@@ -95,23 +95,17 @@ export const initiateSpotifyWebPlayer = async (token) => {
 };
 
 const getDeviceId = async (token) => {
-  try {
-    const response = await spotify.get('/me/player/devices', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  const response = await spotify.get('/me/player/devices', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-    if (response.data.devices[0]) {
-      return response.data.devices[0].id;
-    }
-    return null;
-  } catch (err) {
-    console.log('No devices found');
-    return null;
+  if (response.data.devices[0]) {
+    return response.data.devices[0].id;
   }
+  throw new Error('No devices found');
 };
 
 export const changeSpotifyMusic = async (uri, href, token) => {
-  console.log('Setting music');
   const deviceId = await getDeviceId(token);
   if (
     !deviceId &&
@@ -130,9 +124,7 @@ export const changeSpotifyMusic = async (uri, href, token) => {
     }
   } else {
     try {
-      console.log('Found device');
-
-      const response = await spotify.put(
+      await spotify.put(
         '/me/player/play',
         {
           uris: [uri],
@@ -145,7 +137,6 @@ export const changeSpotifyMusic = async (uri, href, token) => {
           },
         },
       );
-      console.log(response);
     } catch (err) {
       if (err.response && err.response.status === 403) {
         throw new Error('Playback failed - do you have Spotify Premium?');
