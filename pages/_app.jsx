@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useDidMount, useLocalstorageState } from 'rooks';
+import { useDidMount, useEffectOnceWhen, useLocalstorageState } from 'rooks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -52,10 +52,11 @@ export default function App({ Component, pageProps }) {
 
       push('/', undefined, { shallow: true });
     }
-    if (spotifyToken) {
-      initiateSpotifyWebPlayer(spotifyToken);
-    }
   }, [hash, push, setSpotifyToken, setTokenTimeout, spotifyToken]);
+
+  useEffectOnceWhen(() => {
+    initiateSpotifyWebPlayer(spotifyToken);
+  }, spotifyToken);
 
   useEffect(() => {
     let timeout;
