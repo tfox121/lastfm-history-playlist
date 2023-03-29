@@ -14,6 +14,7 @@ export default function TrackImage({ track, fallbackArt, interactive }) {
   const handlePlay = () => {
     changeSpotifyMusic(track.uri, track.external_urls.spotify, spotifyToken);
   };
+
   return (
     <Box
       position="relative"

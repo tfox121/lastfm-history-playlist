@@ -22,12 +22,7 @@ export default function SpotifyPlayer() {
   const { spotifyToken, setSpotifyToken } = useSpotifyToken();
   const [isPlaying, setIsPlaying] = useState('Paused');
   const [progressMs, setProgressMs] = useState(0);
-  const [mediaItem, setMediaItem] = useState({
-    album: { images: [{ url: '' }] },
-    name: '',
-    artists: [{ name: '' }],
-    duration_ms: 0,
-  });
+  const [mediaItem, setMediaItem] = useState(null);
 
   useEffect(() => {
     const getCurrentlyPlaying = async () => {
@@ -57,7 +52,7 @@ export default function SpotifyPlayer() {
     };
   }, [spotifyToken, setSpotifyToken, router, isPlaying]);
 
-  if (!mediaItem || !mediaItem.name) {
+  if (!mediaItem?.name) {
     return null;
   }
 
@@ -134,9 +129,9 @@ export default function SpotifyPlayer() {
             alignItems="start"
             mx={1.75}
           >
-            <Typography fontWeight="500">{mediaItem.name}</Typography>
+            <Typography fontWeight="500">{mediaItem?.name}</Typography>
             <Typography fontWeight="200" fontSize="0.75em">
-              {mediaItem.artists[0].name}
+              {mediaItem?.artists[0]?.name}
             </Typography>
           </Box>
         </Grid>
@@ -173,7 +168,9 @@ export default function SpotifyPlayer() {
                 sx={{
                   ...progressBarStyles,
                   backgroundColor: '#fff',
-                  width: `${(progressMs * 100) / mediaItem.duration_ms}%`,
+                  width: `${
+                    (progressMs * 100) / (mediaItem?.duration_ms ?? 1)
+                  }%`,
                 }}
               />
               <Box
@@ -192,7 +189,7 @@ export default function SpotifyPlayer() {
               minWidth={40}
               textAlign="left"
             >
-              {millisecondsToMinsAndSecs(mediaItem.duration_ms)}
+              {millisecondsToMinsAndSecs(mediaItem?.duration_ms)}
             </Typography>
           </Box>
         </Grid>

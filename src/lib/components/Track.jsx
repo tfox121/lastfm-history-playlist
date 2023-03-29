@@ -1,17 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
 import { format } from 'date-fns';
+import { useEffectOnceWhen } from 'rooks';
 
 import theme from '../../theme';
 import { spotify, spotifyAuth } from '../utils';
 import TrackImage from './TrackImage';
 
 export default function Track({ month }) {
-  const track = useRef(null);
+  const [track, setTrack] = useState(null);
   const { data: spotifyToken } = useQuery(['spotifyAuthToken'], () =>
     spotifyAuth(),
   );
@@ -19,7 +20,6 @@ export default function Track({ month }) {
   const formattedDate = format(dateFromUnix, 'MMMM Y');
 
   const topTrack = month.track[0];
-  if (!topTrack) return null;
 
   const query = `track:${encodeURIComponent(
     month.track[0].name,
@@ -27,25 +27,29 @@ export default function Track({ month }) {
     month.track[0].artist['#text'],
   )}&type=track&limit=1`;
 
-  spotify
-    .get(`/search?q=${query}`, {
-      headers: { Authorization: `Bearer ${spotifyToken}` },
-    })
-    .then(({ data }) => {
-      [track.current] = data.tracks.items;
-    })
-    .catch(() => {
-      console.warn(
-        `Cannot find artwork for ${month.track[0].name} by ${month.track[0].artist['#text']}`,
-      );
-    });
+  useEffectOnceWhen(() => {
+    spotify
+      .get(`/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${spotifyToken}` },
+      })
+      .then(({ data }) => {
+        setTrack(data.tracks.items[0]);
+      })
+      .catch(() => {
+        console.warn(
+          `Cannot find artwork for ${month.track[0].name} by ${month.track[0].artist['#text']}`,
+        );
+      });
+  }, !!spotifyToken);
+
+  if (!topTrack) return null;
 
   return (
     <>
       <Grid item xs={1}>
         <TrackImage
-          track={track.current}
-          fallbackArt={month.track[0].image[2]['#text']}
+          track={track}
+          fallbackArt={topTrack.image[2]['#text']}
           interactive
         />
       </Grid>
@@ -56,7 +60,7 @@ export default function Track({ month }) {
               {formattedDate}
             </Typography>
             <Link
-              href={month.track[0].url}
+              href={topTrack.url}
               variant="p"
               underline="hover"
               target="_blank"
@@ -65,7 +69,7 @@ export default function Track({ month }) {
                 color: theme.palette.secondary.contrastText,
               }}
             >
-              {month.track[0].name} - {month.track[0].artist['#text']}
+              {topTrack.name} - {topTrack.artist['#text']}
             </Link>
           </Box>
         </Box>
