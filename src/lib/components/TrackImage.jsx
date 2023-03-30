@@ -22,6 +22,12 @@ export default function TrackImage({ track, fallbackArt, interactive }) {
       height={dimensions}
       onMouseOver={() => setDisplayPlayIcon(true)}
       onMouseOut={() => setDisplayPlayIcon(false)}
+      sx={{
+        '@media (max-width:400px)': {
+          width: '65px',
+          height: '65px',
+        },
+      }}
     >
       <Image
         alt="track image"

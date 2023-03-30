@@ -46,17 +46,25 @@ export default function Track({ month }) {
 
   return (
     <>
-      <Grid item xs={1}>
+      <Grid item xs="auto">
         <TrackImage
           track={track}
           fallbackArt={topTrack.image[2]['#text']}
           interactive
         />
       </Grid>
-      <Grid item xs={11}>
+      <Grid item xs={9} sm={11}>
         <Box height="100%" display="flex" alignItems="center">
           <Box>
-            <Typography variant="subtitle2" color="primary">
+            <Typography
+              variant="subtitle2"
+              color="primary"
+              sx={{
+                '@media (max-width:400px)': {
+                  fontSize: '0.7rem',
+                },
+              }}
+            >
               {formattedDate}
             </Typography>
             <Link
@@ -69,7 +77,16 @@ export default function Track({ month }) {
                 color: theme.palette.secondary.contrastText,
               }}
             >
-              {topTrack.name} - {topTrack.artist['#text']}
+              <Typography
+                sx={{
+                  '@media (max-width:400px)': {
+                    fontSize: '0.85rem',
+                  },
+                  maxHeight: '3em',
+                }}
+              >
+                {topTrack.name} - {topTrack.artist['#text']}
+              </Typography>
             </Link>
           </Box>
         </Box>

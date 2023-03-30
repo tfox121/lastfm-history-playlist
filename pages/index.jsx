@@ -104,6 +104,9 @@ export default function Home() {
             display="flex"
             justifyContent="center"
             alignItems="center"
+            position="sticky"
+            top={0}
+            zIndex={2}
           >
             <Typography variant="caption">
               <SpotifyAuthLink>Login to Spotify</SpotifyAuthLink> to play tracks
@@ -183,7 +186,7 @@ export default function Home() {
                   </Typography>
                 }
               >
-                <Grid container rowSpacing={1}>
+                <Grid container rowSpacing={1} columnSpacing={{ xs: 1 }}>
                   {topTrackMonths?.pages[0]?.data &&
                     topTrackMonthsConcat.current?.map((month) => (
                       <Track key={month['@attr'].from} month={month} />
