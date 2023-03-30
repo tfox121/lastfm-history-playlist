@@ -62,10 +62,6 @@ export default function SpotifyPlayer() {
     borderRadius: '2px',
   };
 
-  // const progressBarStyles = {
-  //   // ,
-  // };
-
   const skip = (direction) => {
     spotify.post(
       `/me/player/${direction}`,
