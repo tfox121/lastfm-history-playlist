@@ -2,6 +2,8 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
+import isMobileDevice from './isMobileDevice';
+
 const authEndpoint = 'https://accounts.spotify.com/api/token';
 const authString = `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET}`;
 
@@ -35,11 +37,7 @@ export const spotifyAuth = async () => {
 };
 
 export const initiateSpotifyWebPlayer = async (token) => {
-  if (
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent,
-    )
-  ) {
+  if (isMobileDevice) {
     console.log('Web playback not supported on mobile devices');
   } else {
     window.onSpotifyWebPlaybackSDKReady = () => {

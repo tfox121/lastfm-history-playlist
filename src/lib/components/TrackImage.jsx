@@ -3,7 +3,8 @@ import Image from 'next/image';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { changeSpotifyMusic } from '../utils';
+
+import { changeSpotifyMusic, isMobileDevice } from '../utils';
 import { useSpotifyToken } from '../hooks';
 
 export default function TrackImage({ track, fallbackArt, interactive }) {
@@ -35,7 +36,7 @@ export default function TrackImage({ track, fallbackArt, interactive }) {
         sizes="100%"
         fill
       />
-      {interactive && displayPlayIcon && (
+      {!isMobileDevice && interactive && displayPlayIcon && (
         <Box
           position="absolute"
           zIndex={2}
