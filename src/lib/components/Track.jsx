@@ -21,13 +21,13 @@ export default function Track({ month }) {
 
   const topTrack = month.track[0];
 
-  const query = `track:${encodeURIComponent(
-    month.track[0].name,
-  )}%20artist:${encodeURIComponent(
-    month.track[0].artist['#text'],
-  )}&type=track&limit=1`;
-
   useEffectOnceWhen(() => {
+    const query = `track:${encodeURIComponent(
+      topTrack.name,
+    )}%20artist:${encodeURIComponent(
+      topTrack.artist['#text'],
+    )}&type=track&limit=1`;
+
     spotify
       .get(`/search?q=${query}`, {
         headers: { Authorization: `Bearer ${spotifyToken}` },
@@ -37,10 +37,10 @@ export default function Track({ month }) {
       })
       .catch(() => {
         console.warn(
-          `Cannot find artwork for ${month.track[0].name} by ${month.track[0].artist['#text']}`,
+          `Cannot find artwork for ${topTrack.name} by ${topTrack.artist['#text']}`,
         );
       });
-  }, !!spotifyToken);
+  }, !!spotifyToken && !!topTrack);
 
   if (!topTrack) return null;
 

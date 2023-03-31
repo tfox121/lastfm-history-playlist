@@ -22,6 +22,7 @@ import {
   getValidMonths,
   getMonthlyTopTracksPage,
   arrToChunks,
+  isMobileDevice,
 } from '@/src/lib/utils';
 import { SpotifyAuthLink, SpotifyPlayer, Track } from '@/src/lib/components';
 import { useSpotifyToken } from '@/src/lib/hooks';
@@ -96,7 +97,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        {!spotifyToken && (
+        {!spotifyToken && !isMobileDevice() && (
           <Box
             width="100%"
             height="1.5em"

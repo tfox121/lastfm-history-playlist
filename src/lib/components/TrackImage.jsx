@@ -36,7 +36,7 @@ export default function TrackImage({ track, fallbackArt, interactive }) {
         sizes="100%"
         fill
       />
-      {!isMobileDevice && interactive && displayPlayIcon && (
+      {!isMobileDevice() && spotifyToken && interactive && displayPlayIcon && (
         <Box
           position="absolute"
           zIndex={2}

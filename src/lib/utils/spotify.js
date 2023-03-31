@@ -37,7 +37,7 @@ export const spotifyAuth = async () => {
 };
 
 export const initiateSpotifyWebPlayer = async (token) => {
-  if (isMobileDevice) {
+  if (isMobileDevice()) {
     console.log('Web playback not supported on mobile devices');
   } else {
     window.onSpotifyWebPlaybackSDKReady = () => {
