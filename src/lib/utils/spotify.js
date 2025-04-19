@@ -5,7 +5,6 @@ import axiosRetry from 'axios-retry';
 import isMobileDevice from './isMobileDevice';
 
 const authEndpoint = 'https://accounts.spotify.com/api/token';
-const authString = `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET}`;
 
 export const spotify = axios.create({
   baseURL: 'https://api.spotify.com/v1',
@@ -18,20 +17,16 @@ axiosRetry(spotify, {
 
 // Credentials for obtaining album art
 export const spotifyAuth = async () => {
-  const authorisation = Buffer.from(authString).toString('base64');
-
-  const res = await axios.post(
-    authEndpoint,
-    {
-      grant_type: 'client_credentials',
+  const body = new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
+    client_secret: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET,
+  });
+  const res = await axios.post(authEndpoint, body, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Basic ${authorisation}`,
-      },
-    },
-  );
+  });
 
   return res.data.access_token;
 };
