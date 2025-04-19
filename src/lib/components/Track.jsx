@@ -13,9 +13,10 @@ import TrackImage from './TrackImage';
 
 export default function Track({ month }) {
   const [track, setTrack] = useState(null);
-  const { data: spotifyToken } = useQuery(['spotifyAuthToken'], () =>
-    spotifyAuth(),
-  );
+  const { data: spotifyToken } = useQuery({
+    queryKey: ['spotifyAuthToken'],
+    queryFn: spotifyAuth,
+  });
   const dateFromUnix = new Date(Number(month['@attr'].from) * 1000);
   const formattedDate = format(dateFromUnix, 'MMMM Y');
 
@@ -46,14 +47,14 @@ export default function Track({ month }) {
 
   return (
     <>
-      <Grid item xs="auto">
+      <Grid size={{ xs: 'auto' }}>
         <TrackImage
           track={track}
           fallbackArt={topTrack.image[2]['#text']}
           interactive
         />
       </Grid>
-      <Grid item xs={9} sm={11}>
+      <Grid size={{ xs: 9, sm: 11 }}>
         <Box height="100%" display="flex" alignItems="center">
           <Box>
             <Typography

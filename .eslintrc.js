@@ -6,8 +6,6 @@ module.exports = {
     node: true,
   },
   extends: [
-    'airbnb',
-    'airbnb/hooks',
     'plugin:import/errors',
     'plugin:import/warnings',
     'next/core-web-vitals',

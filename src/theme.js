@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { Barlow } from '@next/font/google';
+import { Barlow } from 'next/font/google';
 import NextLink from 'next/link';
 import { forwardRef } from 'react';
 
