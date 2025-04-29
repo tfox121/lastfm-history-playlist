@@ -13,6 +13,7 @@ import {
   getSpotifyPlayingState,
   millisecondsToMinsAndSecs,
   spotify,
+  useSpotifyPolling,
 } from '../utils';
 import TrackImage from './TrackImage';
 import { useSpotifyToken } from '../hooks';
@@ -24,33 +25,13 @@ export default function SpotifyPlayer() {
   const [progressMs, setProgressMs] = useState(0);
   const [mediaItem, setMediaItem] = useState(null);
 
-  useEffect(() => {
-    const getCurrentlyPlaying = async () => {
-      try {
-        const response = await getSpotifyPlayingState(spotifyToken);
-        const { item, is_playing, progress_ms } = response.data;
-        setMediaItem(item);
-        if (is_playing !== isPlaying) setIsPlaying(is_playing);
-        setProgressMs(progress_ms);
-      } catch (err) {
-        console.error(err);
-        if (err.response.data.error.message === 'The access token expired') {
-          setSpotifyToken('');
-        }
-      }
-    };
-
-    let checkInterval;
-    if (spotifyToken) {
-      checkInterval = setInterval(getCurrentlyPlaying, 1000);
-    }
-    if (!spotifyToken && checkInterval) {
-      clearInterval(checkInterval);
-    }
-    return () => {
-      clearInterval(checkInterval);
-    };
-  }, [spotifyToken, setSpotifyToken, router, isPlaying]);
+  useSpotifyPolling({
+    spotifyToken,
+    setSpotifyToken,
+    setMediaItem,
+    setIsPlaying,
+    setProgressMs,
+  });
 
   if (!mediaItem?.name) {
     return null;

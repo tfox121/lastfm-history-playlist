@@ -1,11 +1,11 @@
+import axios from 'axios';
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useDidMount, useEffectOnceWhen, useLocalstorageState } from 'rooks';
+import { useEffectOnceWhen, useLocalstorageState } from 'rooks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-
 import { initiateSpotifyWebPlayer } from '@/src/lib/utils';
 import theme from '@/src/theme';
 
@@ -18,11 +18,14 @@ const SpotifyTokenProvider = dynamic(
 );
 
 export default function App({ Component, pageProps }) {
-  const { asPath, push } = useRouter();
-  const hash = asPath.split('#')[1];
+  const { push, query } = useRouter();
 
   const [spotifyToken, setSpotifyToken] = useLocalstorageState(
     'lastfm-top-tracks:spotify-token',
+    '',
+  );
+  const [spotifyRefreshToken, setSpotifyRefreshToken] = useLocalstorageState(
+    'lastfm-top-tracks:spotify-refresh-token',
     '',
   );
   const [tokenTimeout, setTokenTimeout] = useLocalstorageState(
@@ -41,18 +44,49 @@ export default function App({ Component, pageProps }) {
     },
   });
 
-  useDidMount(() => {
-    if (hash && hash !== spotifyToken) {
-      const accessToken = hash.slice(1).split('&')[0].split('=')[1];
-      setSpotifyToken(accessToken);
+  useEffect(() => {
+    // only run when we've got a code+state and no token yet
+    if (!spotifyToken && query.code && query.state) {
+      const storedState = sessionStorage.getItem('spotify_pkce_state');
+      if (query.state !== storedState) {
+        push('/', undefined, { shallow: true });
+        return;
+      }
 
-      const timeout = new Date();
-      timeout.setHours(timeout.getHours() + 1);
-      setTokenTimeout(timeout.getTime());
+      const codeVerifier = sessionStorage.getItem('spotify_pkce_verifier');
+      const body = new URLSearchParams({
+        client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
+        grant_type: 'authorization_code',
+        code: query.code,
+        redirect_uri: window.location.origin + '/',
+        code_verifier: codeVerifier,
+      }).toString();
 
-      push('/', undefined, { shallow: true });
+      // wrap everything in an async IIFE with try/catch
+      (async () => {
+        try {
+          const res = await axios.post(
+            'https://accounts.spotify.com/api/token',
+            body,
+            {
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            },
+          );
+          const { access_token, refresh_token, expires_in } = res.data;
+
+          setSpotifyToken(access_token);
+          setSpotifyRefreshToken(refresh_token);
+          setTokenTimeout(Date.now() + expires_in * 1000);
+
+          push('/', undefined, { shallow: true });
+        } catch (err) {
+          // **this catch** will swallow the 400 and prevent a runtime crash
+          console.error('Token exchange failed', err.response?.data || err);
+          // optionally show a user‑friendly message, or push back to “retry”
+        }
+      })();
     }
-  }, [hash, push, setSpotifyToken, setTokenTimeout, spotifyToken]);
+  }, [query, spotifyToken, push]);
 
   useEffectOnceWhen(() => {
     initiateSpotifyWebPlayer(spotifyToken);

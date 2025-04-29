@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from '@mui/material/Link';
+import { buildPkceAuthoriseUrl } from '../utils';
 
 export default function SpotifyAuthLink({ children }) {
-  const url = `https://accounts.spotify.com/authorize?client_id=${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}&response_type=token&redirect_uri=${process.env.NEXT_PUBLIC_CALLBACK_URL}&scope=streaming%20user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-private`;
+  const [auth_url, set_auth_url] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      // don’t run during SSR – window is undefined there
+      if (typeof window === 'undefined') return;
+
+      const url = await buildPkceAuthoriseUrl();
+      if (!cancelled) set_auth_url(url);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
-    <Link color="#fff" href={url}>
+    <Link color="#fff" href={auth_url ?? '#'}>
       {children}
     </Link>
   );

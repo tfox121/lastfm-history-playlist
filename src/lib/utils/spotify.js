@@ -31,6 +31,72 @@ export const spotifyAuth = async () => {
   return res.data.access_token;
 };
 
+// pkce.js
+
+/**
+ * Build a Spotify /authorize URL for the “Authorisation Code + PKCE” flow
+ * and stash the code_verifier + state in sessionStorage for the callback step.
+ */
+export async function buildPkceAuthoriseUrl() {
+  const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+  const redirectUri = process.env.NEXT_PUBLIC_CALLBACK_URL; // e.g. https://localhost:3000/callback
+  const scopes = [
+    'streaming',
+    'user-read-private',
+    'user-read-playback-state',
+    'user-read-currently-playing',
+    'user-modify-playback-state',
+  ].join(' ');
+
+  // --- helpers --------------------------------------------------------------
+  const randomBytes = (length) => {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return array;
+  };
+
+  const base64url = (buffer) =>
+    btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  // --------------------------------------------------------------------------
+
+  // 1. Generate verifier (64 random bytes → 88‑char base64url string).
+  const codeVerifier =
+    sessionStorage.getItem('spotify_pkce_verifier') ??
+    base64url(randomBytes(64));
+
+  codeVerifier;
+  // 2. Derive challenge (SHA‑256 → base64url).
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(codeVerifier),
+  );
+  const codeChallenge = base64url(digest);
+
+  // 3. CSRF token.
+  const state =
+    sessionStorage.getItem('spotify_pkce_state') ?? base64url(randomBytes(16));
+
+  // 4. Persist for the callback page.
+  sessionStorage.setItem('spotify_pkce_verifier', codeVerifier);
+  sessionStorage.setItem('spotify_pkce_state', state);
+
+  // 5. Build the /authorize URL.
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: 'code',
+    redirect_uri: redirectUri,
+    scope: scopes,
+    code_challenge_method: 'S256',
+    code_challenge: codeChallenge,
+    state,
+  });
+
+  return `https://accounts.spotify.com/authorize?${params.toString()}`;
+}
+
 export const initiateSpotifyWebPlayer = async (token) => {
   if (isMobileDevice()) {
     console.log('Web playback not supported on mobile devices');
@@ -59,9 +125,9 @@ export const initiateSpotifyWebPlayer = async (token) => {
       });
 
       // Playback status updates
-      // player.addListener('player_state_changed', (state) => {
-      //    console.log(state);
-      // });
+      player.addListener('player_state_changed', (state) => {
+        console.log(state);
+      });
 
       // Ready
       player.addListener('ready', ({ device_id }) => {
@@ -144,7 +210,4 @@ export const changeSpotifyMusic = async (uri, href, token) => {
 export const getSpotifyPlayingState = (token) =>
   spotify.get('/me/player/currently-playing', {
     headers: { Authorization: `Bearer ${token}` },
-    params: {
-      market: 'from_token',
-    },
   });

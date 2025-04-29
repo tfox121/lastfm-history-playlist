@@ -36,6 +36,16 @@ export default function Home() {
   const topTrackMonthsConcat = useRef(null);
   const { spotifyToken } = useSpotifyToken();
 
+  const spotifyConfigured =
+    process.env.NEXT_PUBLIC_CALLBACK_URL &&
+    process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+
+  if (!spotifyConfigured) {
+    console.warn(
+      'Spotify environment variables not set - features unavailable',
+    );
+  }
+
   const {
     isLoading: isLoadingUser,
     error: errorUser,
@@ -97,7 +107,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        {!spotifyToken && !isMobileDevice() && (
+        {spotifyConfigured && !spotifyToken && !isMobileDevice() && (
           <Box
             width="100%"
             height="1.5em"
