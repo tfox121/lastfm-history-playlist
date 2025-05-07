@@ -92,8 +92,7 @@ export default function SpotifyPlayer() {
     >
       <Grid container height="100%" columns={10}>
         <Grid
-          item
-          xs={3}
+          size={3}
           display="flex"
           justifyContent="flex-start"
           alignItems="center"
@@ -113,8 +112,7 @@ export default function SpotifyPlayer() {
           </Box>
         </Grid>
         <Grid
-          item
-          xs={4}
+          size={4}
           display="flex"
           flexDirection="column"
           justifyContent="center"
@@ -170,7 +168,7 @@ export default function SpotifyPlayer() {
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={3} />
+        <Grid size={3} />
       </Grid>
     </Box>
   );

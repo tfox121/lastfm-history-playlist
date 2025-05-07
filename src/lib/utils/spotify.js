@@ -43,6 +43,7 @@ export async function buildPkceAuthoriseUrl() {
   const scopes = [
     'streaming',
     'user-read-private',
+    'user-read-email',
     'user-read-playback-state',
     'user-read-currently-playing',
     'user-modify-playback-state',

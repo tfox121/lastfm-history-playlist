@@ -16,7 +16,6 @@ export default function useSpotifyPolling({
 
     const poll = async () => {
       try {
-        console.log({ spotifyToken });
         const { data } = await getSpotifyPlayingState(spotifyToken);
 
         const { item, is_playing, progress_ms } = data;

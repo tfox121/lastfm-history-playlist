@@ -76,6 +76,7 @@ export default function App({ Component, pageProps }) {
 
           setSpotifyToken(access_token);
           setSpotifyRefreshToken(refresh_token);
+          // TODO: Create refresh flow
           setTokenTimeout(Date.now() + expires_in * 1000);
 
           push('/', undefined, { shallow: true });
